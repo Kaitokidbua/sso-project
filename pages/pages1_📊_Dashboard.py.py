@@ -3,40 +3,27 @@ import pandas as pd
 import plotly.express as px
 import duckdb
 
-st.set_page_config(layout="wide")
+st.title("📊 วิเคราะห์สถิติประกันสังคม")
 
 @st.cache_data
-def load_data():
-    # ในหน้างานจริงจะใช้: con = duckdb.connect() และ query จากไฟล์ .xls
-    # อันนี้จำลองข้อมูลเพื่อให้ code รันโชว์กราฟได้ทันที
-    data = {
-        'ปี': [2565, 2565, 2565, 2566, 2566, 2566, 2567, 2567, 2567],
-        'มาตรา': ['ม.33', 'ม.39', 'ม.40']*3,
-        'จำนวนผู้ประกันตน (คน)': [11000000, 1800000, 10000000, 11200000, 1900000, 10500000, 11500000, 2000000, 11000000]
-    }
-    return pd.DataFrame(data)
+def get_cleaned_data():
+    # ใช้ DuckDB อ่านไฟล์ทั้งหมดในโฟลเดอร์ cleaned_data
+    con = duckdb.connect()
+    # ถ้ายังไม่ได้รัน data_cleaning.py จะยังไม่มีไฟล์ cleaned_data/
+    try:
+        df = con.execute("SELECT * FROM 'cleaned_data/*.csv'").df()
+        return df
+    except:
+        return pd.DataFrame()
 
-st.title("📊 วิเคราะห์เทรนด์ประกันสังคม")
+df = get_cleaned_data()
 
-df = load_data()
-
-# ตัวเลือกจังหวัด (ในที่นี้จำลองภาพรวม)
-st.selectbox("เลือกจังหวัดที่คุณสนใจ", ["ภาพรวมทั้งประเทศ", "กรุงเทพมหานคร", "เชียงใหม่", "ชลบุรี"])
-
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    st.subheader("แนวโน้มผู้ใช้ประกันสังคม 3 ปี (2565-2567)")
-    fig = px.line(df, x='ปี', y='จำนวนผู้ประกันตน (คน)', color='มาตรา', 
-                  template="plotly_dark", markers=True)
+if df.empty:
+    st.warning("⚠️ ไม่พบข้อมูลที่คลีนแล้ว กรุณาตรวจสอบโฟลเดอร์ cleaned_data")
+else:
+    # กราฟเปรียบเทียบแต่ละปี
+    st.subheader("แนวโน้มผู้ประกันตนรายมาตรา")
+    fig = px.bar(df, x="ปี", color="มาตรา", template="plotly_dark", barmode="group")
     st.plotly_chart(fig, use_container_width=True)
-
-with col2:
-    st.subheader("ทำไมต้องรู้?")
-    st.write("กราฟนี้ช่วยบอกว่าคนในพื้นที่ของคุณส่วนใหญ่ประกอบอาชีพอะไร และเศรษฐกิจกำลังเปลี่ยนจากพนักงานประจำไปเป็นฟรีแลนซ์มากน้อยแค่ไหน")
-
-st.divider()
-
-# ส่วนข้อมูลฉุกเฉิน (จำลองจากไฟล์อุบัติเหตุ 2566)
-st.subheader("🚨 สถิติการใช้สิทธิฉุกเฉิน/อุบัติเหตุ")
-st.warning("จังหวัดที่มีการใช้สิทธิสูงสุด 3 อันดับแรก: 1.กรุงเทพฯ 2.ชลบุรี 3.สมุทรปราการ")
+    
+    st.write("📌 ข้อมูลนี้ช่วยให้คุณเห็นว่าในแต่ละปีมีการเคลื่อนย้ายแรงงานอย่างไร")
