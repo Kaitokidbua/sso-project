@@ -1,26 +1,23 @@
 import streamlit as st
-import google.generativeai as genai
 
-st.title("🤖 ผู้ช่วย AI ปรึกษาสิทธิประกันสังคม")
-
-# ตั้งค่า API Key (ต้องใส่ใน Streamlit Secrets)
-# genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-
-st.chat_message("assistant").write("สวัสดีครับ ผมคือ AI ผู้เชี่ยวชาญด้านประกันสังคม มีอะไรอยากให้ผมช่วยวางแผนไหมครับ?")
+st.title("🤖 ปรึกษา AI เรื่องประกันสังคม")
 
 if "messages" not in st.session_state:
-    st.session_state["messages"] = []
+    st.session_state.messages = []
 
-# แสดงประวัติการแชท
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+# แสดงแชท
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-if prompt := st.chat_input("ตัวอย่าง: อายุ 28 ส่งมา 3 ปี ลาออกแล้วสิทธิหายไหม?"):
+if prompt := st.chat_input("พิมพ์คำถามได้เลย เช่น ลาออกแล้วจะต่อ ม.39 คุ้มไหม?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # คำแนะนำจำลอง (ในอนาคตเชื่อมต่อ API)
+    response = "จากการวิเคราะห์ข้อมูลของคุณ หากย้ายจาก ม.33 ไป ม.40 ทันที สิทธิว่างงานจะหายไป แนะนำให้ตรวจสอบเงินสะสมชราภาพเดิมก่อนครับ"
     
-    # ส่วนนี้คือ Logic การส่ง Prompt (จำลองคำตอบ)
-    response = f"ตอบคุณ: {prompt} \n\n (ในระบบจริง AI จะนำข้อมูลจากไฟล์ Excel ปี 2567 และกฎหมายมาตรา 33, 39, 40 มาประมวลผลให้คุณครับ)"
-    
+    with st.chat_message("assistant"):
+        st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
-    st.chat_message("assistant").write(response)
