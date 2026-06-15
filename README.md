@@ -9,7 +9,7 @@
 
 ## 🛠 เทคโนโลยีที่ใช้
 - **Frontend:** Streamlit (Theme: Dark Mode)
-- **Database:** DuckDB (ใช้ Query ไฟล์ Excel ความเร็วสูง)
+- **Database:** DuckDB (ใช้ Query ไฟล์ Excel ความเร็วสูง), MongoDB, Snowflake และ SQLite
 - **Data:** Pandas & Plotly
 - **AI:** Google Gemini API (หรือ OpenAI)
 
